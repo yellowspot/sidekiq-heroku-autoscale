@@ -16,6 +16,6 @@ Gem::Specification.new do |s|
   s.homepage    = 'https://github.com/gmac/sidekiq-heroku-autoscale'
   s.licenses    = ['MIT']
 
-  s.add_dependency 'sidekiq', '>= 5.0'
+  s.add_dependency 'sidekiq', '>= 5.0', '< 7.0'
   s.add_dependency 'platform-api', '~> 3.3.0'
 end
