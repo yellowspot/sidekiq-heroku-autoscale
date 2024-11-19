@@ -99,7 +99,7 @@ describe 'Sidekiq::HerokuAutoscale::ScaleStrategy' do
 
     it 'does not downscale engaged workers' do
       @sys.dynos = 2
-      subject = @subject.new(max_dynos: 5, workers_per_dyno: 4)
+      subject = @subject.new(max_dynos: 5, workers_per_dyno: 4, min_dynos: 2)
       assert_equal 2, subject.linear(@sys)
     end
 

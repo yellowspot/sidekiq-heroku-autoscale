@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.name        = 'sidekiq-heroku-autoscale'.freeze
   s.version     = Sidekiq::HerokuAutoscale::VERSION
 
-  s.required_ruby_version = '~> 2.5'
+  s.required_ruby_version = '>= 2.5'
   s.require_paths         = ['lib']
   s.files                 = Dir['README.md', 'lib/**/*']
 
@@ -16,6 +16,6 @@ Gem::Specification.new do |s|
   s.homepage    = 'https://github.com/gmac/sidekiq-heroku-autoscale'
   s.licenses    = ['MIT']
 
-  s.add_dependency 'sidekiq', '>= 5.0'
+  s.add_dependency 'sidekiq', '>= 5.0', '< 7.0'
   s.add_dependency 'platform-api', '~> 3.3.0'
 end

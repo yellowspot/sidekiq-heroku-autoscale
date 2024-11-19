@@ -3,35 +3,44 @@ PATH
   specs:
     sidekiq-heroku-autoscale (0.0.1)
       platform-api (~> 3.3.0)
-      sidekiq (>= 5.0)
+      sidekiq (>= 5.0, < 7.0)
 
 GEM
   remote: http://rubygems.org/
   specs:
-    connection_pool (2.2.2)
+    base64 (0.2.0)
+    connection_pool (2.4.1)
     erubis (2.7.0)
-    excon (0.71.1)
-    heroics (0.0.25)
+    excon (1.2.1)
+    heroics (0.1.3)
+      base64
       erubis (~> 2.0)
       excon
       moneta
       multi_json (>= 1.9.2)
-    minitest (5.13.0)
+      webrick
+    logger (1.6.1)
+    minitest (5.25.1)
     moneta (1.0.0)
-    multi_json (1.14.1)
+    multi_json (1.15.0)
     platform-api (3.3.0)
-      heroics (~> 0.0.25)
+      heroics (~> 0.1.1)
       moneta (~> 1.0.0)
-    rack (2.2.3)
-    rack-protection (2.0.8.1)
-      rack
+      rate_throttle_client (~> 0.1.0)
+    rack (3.1.8)
+    rack-protection (4.1.0)
+      base64 (>= 0.1.0)
+      logger (>= 1.6.0)
+      rack (>= 3.0.0, < 4)
     rake (12.3.3)
+    rate_throttle_client (0.1.2)
     redis (4.1.3)
     sidekiq (5.2.7)
       connection_pool (~> 2.2, >= 2.2.2)
       rack (>= 1.5.0)
       rack-protection (>= 1.5.0)
       redis (>= 3.3.5, < 5)
+    webrick (1.9.0)
 
 PLATFORMS
   ruby
@@ -40,7 +49,8 @@ DEPENDENCIES
   bundler (~> 2.0)
   minitest (~> 5.12)
   rake (~> 12.0)
+  redis (= 4.1.3)
   sidekiq-heroku-autoscale!
 
 BUNDLED WITH
-   2.1.2
+   2.5.23
