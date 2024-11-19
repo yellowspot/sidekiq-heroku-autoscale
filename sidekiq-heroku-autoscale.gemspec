@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.name        = 'sidekiq-heroku-autoscale'.freeze
   s.version     = Sidekiq::HerokuAutoscale::VERSION
 
-  s.required_ruby_version = '~> 2.5'
+  s.required_ruby_version = '>= 2.5'
   s.require_paths         = ['lib']
   s.files                 = Dir['README.md', 'lib/**/*']
 
