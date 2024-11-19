@@ -233,7 +233,7 @@ describe 'Sidekiq::HerokuAutoscale::Process' do
     end
 
     it 'returns true when updated' do
-      mock_update = MiniTest::Mock.new.expect(:call, 0)
+      mock_update = Minitest::Mock.new.expect(:call, 0)
       @subject.stub(:update!, mock_update) do
         assert @subject.wait_for_update!
       end
@@ -256,7 +256,7 @@ describe 'Sidekiq::HerokuAutoscale::Process' do
     end
 
     it 'returns false when update returns dynos' do
-      mock_update = MiniTest::Mock.new.expect(:call, 1)
+      mock_update = Minitest::Mock.new.expect(:call, 1)
       @subject.stub(:update!, mock_update) do
         assert_not @subject.wait_for_shutdown!
       end
@@ -264,7 +264,7 @@ describe 'Sidekiq::HerokuAutoscale::Process' do
     end
 
     it 'returns true when update returns no dynos' do
-      mock_update = MiniTest::Mock.new.expect(:call, 0)
+      mock_update = Minitest::Mock.new.expect(:call, 0)
       @subject.stub(:update!, mock_update) do
         assert @subject.wait_for_shutdown!
       end
@@ -287,7 +287,7 @@ describe 'Sidekiq::HerokuAutoscale::Process' do
     end
 
     it 'returns target dynos when upscaling' do
-      mock_set_dynos = MiniTest::Mock.new.expect(:call, 2, [2])
+      mock_set_dynos = Minitest::Mock.new.expect(:call, 2, [2])
       @subject.stub(:set_dyno_count!, mock_set_dynos) do
         assert_equal 2, @subject.update!(1, 2)
       end
