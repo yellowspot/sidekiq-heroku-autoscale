@@ -101,10 +101,10 @@ module Sidekiq
         current_page = (now.to_f / @history).floor * @history
         previous_page = current_page - @history
         history_pages = ::Sidekiq.redis do |c|
-          c.pipelined do
+          c.pipelined do |pipeline|
             processes.each do |process|
-              c.hgetall("#{ process.cache_key }:#{ previous_page }")
-              c.hgetall("#{ process.cache_key }:#{ current_page }")
+              pipeline.hgetall("#{ process.cache_key }:#{ previous_page }")
+              pipeline.hgetall("#{ process.cache_key }:#{ current_page }")
             end
           end
         end
