@@ -5,9 +5,17 @@ require 'minitest/pride'
 require 'minitest/autorun'
 require 'sidekiq-heroku-autoscale'
 
-Sidekiq.redis = Sidekiq::RedisConnection.create(:url => ENV.fetch('TEST_REDIS_URL', 'redis://localhost:9736'))
-Sidekiq.logger = ::Logger.new(STDOUT)
-Sidekiq.logger.level = ::Logger::ERROR
+Sidekiq.configure_server do |cfg|
+  cfg.redis = { url: ENV.fetch('TEST_REDIS_URL', 'redis://localhost:9736') }
+  cfg.logger = ::Logger.new(STDOUT)
+  cfg.logger.level = ::Logger::ERROR
+end
+
+Sidekiq.configure_client do |cfg|
+  cfg.redis = { url: ENV.fetch('TEST_REDIS_URL', 'redis://localhost:9736') }
+  cfg.logger = ::Logger.new(STDOUT)
+  cfg.logger.level = ::Logger::ERROR
+end
 
 FIXTURES_PATH = File.expand_path("../fixtures", __FILE__)
 

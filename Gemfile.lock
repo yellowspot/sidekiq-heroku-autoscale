@@ -3,7 +3,7 @@ PATH
   specs:
     sidekiq-heroku-autoscale (0.0.1)
       platform-api (>= 3.7.0)
-      sidekiq (>= 6.0.0, < 7.0)
+      sidekiq (>= 6.0.0, < 8.0)
 
 GEM
   remote: http://rubygems.org/
@@ -19,6 +19,7 @@ GEM
       moneta
       multi_json (>= 1.9.2)
       webrick
+    logger (1.6.1)
     minitest (5.25.1)
     moneta (1.0.0)
     multi_json (1.15.0)
@@ -26,14 +27,16 @@ GEM
       heroics (~> 0.1.1)
       moneta (~> 1.0.0)
       rate_throttle_client (~> 0.1.0)
-    rack (2.2.10)
+    rack (3.1.8)
     rake (12.3.3)
     rate_throttle_client (0.1.2)
-    redis (4.8.1)
-    sidekiq (6.5.12)
-      connection_pool (>= 2.2.5, < 3)
-      rack (~> 2.0)
-      redis (>= 4.5.0, < 5)
+    redis-client (0.22.2)
+      connection_pool
+    sidekiq (7.3.6)
+      connection_pool (>= 2.3.0)
+      logger
+      rack (>= 2.2.4)
+      redis-client (>= 0.22.2)
     webrick (1.9.0)
 
 PLATFORMS
