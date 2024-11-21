@@ -264,13 +264,14 @@ describe 'Sidekiq::HerokuAutoscale::QueueSystem' do
       key = "#{process_name}:#{ pindex }"
       pdata = { 'pid' => pindex, 'hostname' => process_name, 'queues' => queues, 'started_at' => Time.now.to_f }
       Sidekiq.redis do |c|
-        c.sadd('processes', key)
+        c.sadd?('processes', key)
         c.hmset(key, 'info', Sidekiq.dump_json(pdata), 'busy', 0, 'beat', Time.now.to_f, 'quiet', process_name.start_with?('quiet'))
       end
 
+      # https://github.com/sidekiq/sidekiq/blob/v6.5.12/test/test_api.rb#L610
       queues.each_with_index do |queue, tindex|
         wdata = { 'queue' => queue, 'payload' => {}, 'run_at' => Time.now.to_f }
-        Sidekiq.redis { |c| c.hmset("#{key}:workers", "1#{pindex}#{tindex}", Sidekiq.dump_json(wdata)) }
+        Sidekiq.redis { |c| c.hmset("#{key}:work", "1#{pindex}#{tindex}", Sidekiq.dump_json(wdata)) }
       end
     end
   end

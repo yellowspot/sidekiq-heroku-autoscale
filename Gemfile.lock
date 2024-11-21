@@ -3,7 +3,7 @@ PATH
   specs:
     sidekiq-heroku-autoscale (0.0.1)
       platform-api (>= 3.7.0)
-      sidekiq (>= 5.2.10, < 7.0)
+      sidekiq (>= 6.0.0, < 7.0)
 
 GEM
   remote: http://rubygems.org/
@@ -27,17 +27,13 @@ GEM
       moneta (~> 1.0.0)
       rate_throttle_client (~> 0.1.0)
     rack (2.2.10)
-    rack-protection (3.2.0)
-      base64 (>= 0.1.0)
-      rack (~> 2.2, >= 2.2.4)
     rake (12.3.3)
     rate_throttle_client (0.1.2)
-    redis (4.5.1)
-    sidekiq (5.2.10)
-      connection_pool (~> 2.2, >= 2.2.2)
+    redis (4.8.1)
+    sidekiq (6.5.12)
+      connection_pool (>= 2.2.5, < 3)
       rack (~> 2.0)
-      rack-protection (>= 1.5.0)
-      redis (~> 4.5, < 4.6.0)
+      redis (>= 4.5.0, < 5)
     webrick (1.9.0)
 
 PLATFORMS
