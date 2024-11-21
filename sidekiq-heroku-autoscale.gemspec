@@ -17,5 +17,5 @@ Gem::Specification.new do |s|
   s.licenses    = ['MIT']
 
   s.add_dependency 'sidekiq', '>= 5.2.10', '< 7.0'
-  s.add_dependency 'platform-api', '~> 3.7.0'
+  s.add_dependency 'platform-api', '>= 3.7.0'
 end
