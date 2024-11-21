@@ -30,7 +30,7 @@ module Sidekiq
       def threads
         # work => { 'queue' => name, 'run_at' => timestamp, 'payload' => msg }
         worker_set = ::Sidekiq::Workers.new.to_a
-        worker_set = worker_set.select { |pid, tid, work| watch_queues.include?(work.queue) } unless all_queues?
+        worker_set = worker_set.select { |pid, tid, work| watch_queues.include?(work_queue(work)) } unless all_queues?
         worker_set.length
       end
 
@@ -95,6 +95,12 @@ module Sidekiq
       def count_jobs(job_set)
         return job_set.size if all_queues?
         job_set.count { |j| watch_queues.include?(j.queue) }
+      end
+
+      def work_queue(work)
+        return work.queue if work.respond_to?(:queue)
+
+        work['queue']
       end
     end
 
