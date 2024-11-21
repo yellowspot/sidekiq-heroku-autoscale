@@ -229,7 +229,7 @@ module Sidekiq
           c.pipelined do |pipeline|
             # set new keys, delete expired keys
             del, set = cache.partition { |k, v| v.nil? }
-            pipeline.hmset(cache_key, *set.flatten) if set.any?
+            pipeline.hset(cache_key, set.flatten) if set.any?
             pipeline.hdel(cache_key, *del.map(&:first)) if del.any?
 
             if attrs[:history_at]
@@ -238,7 +238,7 @@ module Sidekiq
               history_page = (attrs[:history_at].to_f / @history).floor * @history
               history_key = "#{ cache_key }:#{ history_page }"
 
-              pipeline.hmset(history_key, (event_time - @throttle).to_s, prev_dynos, event_time.to_s, @dynos)
+              pipeline.hset(history_key, { (event_time - @throttle).to_s => prev_dynos, event_time.to_s => @dynos })
               pipeline.expire(history_key, @history * 2)
             end
           end
