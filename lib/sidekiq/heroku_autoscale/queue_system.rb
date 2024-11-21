@@ -30,7 +30,7 @@ module Sidekiq
       def threads
         # work => { 'queue' => name, 'run_at' => timestamp, 'payload' => msg }
         worker_set = ::Sidekiq::Workers.new.to_a
-        worker_set = worker_set.select { |pid, tid, work| watch_queues.include?(work['queue']) } unless all_queues?
+        worker_set = worker_set.select { |pid, tid, work| watch_queues.include?(work.queue) } unless all_queues?
         worker_set.length
       end
 
