@@ -7,11 +7,14 @@ module Sidekiq
         @before_update = before_update
         @after_update = after_update
         @requests = {}
+        @semaphore = Mutex.new
       end
 
       def call(process)
         return unless process
-        @requests[process.name] ||= process
+        @semaphore.synchronize do
+          @requests[process.name] ||= process
+        end
         poll!
       end
 
@@ -20,7 +23,9 @@ module Sidekiq
           begin
             while @requests.size > 0
               sleep(@before_update) if @before_update > 0
-              @requests.reject! { |n, p| p.send(@method_name) }
+              @semaphore.synchronize do
+                @requests.reject! { |n, p| p.send(@method_name) }
+              end
               sleep(@after_update) if @after_update > 0
             end
           ensure
