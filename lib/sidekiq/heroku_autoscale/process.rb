@@ -52,6 +52,7 @@ module Sidekiq
 
       # request a throttled update
       def ping!
+        Rails.logger.info "#{!!::Sidekiq.server?} ping! - #{ name }"
         @active_at = Time.now.utc
         if ::Sidekiq.server?
           # submit the process for runscaling (up or down)
@@ -105,6 +106,7 @@ module Sidekiq
       # wrapper for throttling the upscale process (client)
       # polling runs until the next update has been called.
       def wait_for_update!
+        Sidekiq.logger.info "(#{!!::Sidekiq.server?})#wait_for_update! - start: #{ updated_since_last_activity? } - #{ throttled? }"
         # resolve (true) when already updated by another process
         # keep waiting (false) when:
         # - redundant updates are called within the throttle window
@@ -115,6 +117,8 @@ module Sidekiq
         # first round of checks use local (process-specific) settings
         # now hit the redis cache and double check settings from other processes
         sync_attributes
+
+        Sidekiq.logger.info "#wait_for_update! - after sync: #{ updated_since_last_activity? } - #{ throttled? }"
         return true if updated_since_last_activity?
         return false if throttled?
 
@@ -146,6 +150,7 @@ module Sidekiq
         end
         set_attributes(attrs)
 
+        Sidekiq.logger.info "#update! - current: #{ current } - target: #{ target }"
         # No changes are allowed while quieting...
         # the quieted dyno needs to be removed (downscaled)
         # before making other changes to the formation.
@@ -153,6 +158,8 @@ module Sidekiq
           # select a new scale target to shoot for
           # (provides a trajectory, not necessarily a destination)
           target ||= scale_strategy.call(queue_system)
+
+          Sidekiq.logger.info "#update! - target fetched - current: #{ current } - target: #{ target }"
 
           # idle
           if current == target
@@ -198,7 +205,7 @@ module Sidekiq
       # sets the live dyno count on Heroku
       def set_dyno_count!(count)
         ::Sidekiq.logger.info("SCALE to #{ count } dynos")
-        @client.formation.update(app_name, name, { quantity: count }) if @client
+        # @client.formation.update(app_name, name, { quantity: count }) if @client
         set_attributes(dynos: count, quieted_to: nil, quieted_at: nil, history_at: Time.now.utc)
         count
       rescue StandardError => e
@@ -247,11 +254,14 @@ module Sidekiq
 
       # syncs configuration across process instances (dynos)
       def sync_attributes
+        Sidekiq.logger.info "#sync_attributes"
         if cache = ::Sidekiq.redis { |c| c.hgetall(cache_key) }
+          Sidekiq.logger.info "#sync_attributes - cache: #{ cache }"
           @dynos = cache['dynos'] ? cache['dynos'].to_i : 0
           @quieted_to = cache['quieted_to'] ? cache['quieted_to'].to_i : nil
           @quieted_at = cache['quieted_at'] ? Time.at(cache['quieted_at'].to_i).utc : nil
           @updated_at = cache['updated_at'] ? Time.at(cache['updated_at'].to_i).utc : nil
+          Sidekiq.logger.info "#sync_attributes - updated_at: #{ updated_at }"
           return true
         end
         false
