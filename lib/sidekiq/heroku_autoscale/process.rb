@@ -205,7 +205,7 @@ module Sidekiq
       # sets the live dyno count on Heroku
       def set_dyno_count!(count)
         ::Sidekiq.logger.info("SCALE to #{ count } dynos")
-        # @client.formation.update(app_name, name, { quantity: count }) if @client
+        @client.formation.update(app_name, name, { quantity: count }) if @client
         set_attributes(dynos: count, quieted_to: nil, quieted_at: nil, history_at: Time.now.utc)
         count
       rescue StandardError => e
