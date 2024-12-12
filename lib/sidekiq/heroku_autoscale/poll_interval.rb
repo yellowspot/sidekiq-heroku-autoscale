@@ -10,7 +10,7 @@ module Sidekiq
         @after_update = after_update
         @requests = {}
         @semaphore = Mutex.new
-        @thread = nil
+        @thread = 1
       end
 
       def call(process)
@@ -26,8 +26,8 @@ module Sidekiq
       end
 
       def poll!
-        log("Does thread exists? #{!!@thread}")
-        @thread ||= Thread.new do
+        log("Does thread exists? #{@thread != 1}")
+        @thread = Thread.new do
           begin
             log("Thread started #{@requests.size}")
             while @requests.size > 0
@@ -47,10 +47,10 @@ module Sidekiq
           ensure
             @semaphore.synchronize do
               log("Cleaning thread")
-              @thread = nil
+              @thread = 1
             end
           end
-        end
+        end if @thread == 1
       end
 
 
