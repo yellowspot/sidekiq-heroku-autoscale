@@ -51,7 +51,7 @@ module Sidekiq
 
       def log(message)
         type = !!::Sidekiq.server? ? 'server' : 'client'
-        ::Sidekiq.logger.info("PollInterval (#{type} - #{method_name}): #{message}")
+        ::Sidekiq.logger.info("PollInterval (#{type} - #{@method_name}): #{message}")
       end
     end
   end
