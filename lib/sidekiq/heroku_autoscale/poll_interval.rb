@@ -10,7 +10,13 @@ module Sidekiq
         @after_update = after_update
         @requests = {}
         @semaphore = Mutex.new
-        @thread = 1
+        # @thread = nil
+        @pool = Concurrent::ThreadPoolExecutor.new(
+          min_threads: 0,
+          max_threads: 1,
+          max_queue: 1,
+          fallback_policy: :discard
+        )
       end
 
       def call(process)
@@ -26,31 +32,48 @@ module Sidekiq
       end
 
       def poll!
-        log("Does thread exists? #{@thread != 1}")
-        @thread = Thread.new do
-          begin
-            log("Thread started #{@requests.size}")
-            while @requests.size > 0
-              log("About to sleep for #{@before_update}")
-              sleep(@before_update) if @before_update > 0
-              log("Wakeup before_update #{@before_update}")
-              @semaphore.synchronize do
-                log("Rejecting all updated #{@requests.size} using #{@method_name}")
-                @requests.reject! { |n, p| p.send(@method_name) }
-                log("After rejecting size #{@requests.size}")
-              end
-              log("About to sleep again #{@after_update}")
-              sleep(@after_update) if @after_update > 0
-
-              log("After iteration size #{@requests.size}")
-            end
-          ensure
+        log("Does thread exists? #{@pool.active_count}")
+        @pool.post do
+          log("Thread started #{@requests.size}")
+          while @requests.size > 0
+            log("About to sleep for #{@before_update}")
+            sleep(@before_update) if @before_update > 0
+            log("Wakeup before_update #{@before_update}")
             @semaphore.synchronize do
-              log("Cleaning thread")
-              @thread = 1
+              log("Rejecting all updated #{@requests.size} using #{@method_name}")
+              @requests.reject! { |n, p| p.send(@method_name) }
+              log("After rejecting size #{@requests.size}")
             end
+            log("About to sleep again #{@after_update}")
+            sleep(@after_update) if @after_update > 0
+
+            log("After iteration size #{@requests.size}")
           end
-        end if @thread == 1
+        end
+        # @thread = Thread.new do
+        #   begin
+        #     log("Thread started #{@requests.size}")
+        #     while @requests.size > 0
+        #       log("About to sleep for #{@before_update}")
+        #       sleep(@before_update) if @before_update > 0
+        #       log("Wakeup before_update #{@before_update}")
+        #       @semaphore.synchronize do
+        #         log("Rejecting all updated #{@requests.size} using #{@method_name}")
+        #         @requests.reject! { |n, p| p.send(@method_name) }
+        #         log("After rejecting size #{@requests.size}")
+        #       end
+        #       log("About to sleep again #{@after_update}")
+        #       sleep(@after_update) if @after_update > 0
+
+        #       log("After iteration size #{@requests.size}")
+        #     end
+        #   ensure
+        #     @semaphore.synchronize do
+        #       log("Cleaning thread")
+        #       @thread = nil
+        #     end
+        #   end
+        # end
       end
 
 
