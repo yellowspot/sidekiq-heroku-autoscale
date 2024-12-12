@@ -52,7 +52,7 @@ module Sidekiq
 
       # request a throttled update
       def ping!
-        Rails.logger.info "#{!!::Sidekiq.server?} ping! - #{ name }"
+        ::Sidekiq.logger.info "#{!!::Sidekiq.server?} ping! - #{ name }"
         @active_at = Time.now.utc
         if ::Sidekiq.server?
           # submit the process for runscaling (up or down)
@@ -150,7 +150,7 @@ module Sidekiq
         end
         set_attributes(attrs)
 
-        Sidekiq.logger.info "#update! - current: #{ current } - target: #{ target }"
+        ::Sidekiq.logger.info "#update! - current: #{ current } - target: #{ target }"
         # No changes are allowed while quieting...
         # the quieted dyno needs to be removed (downscaled)
         # before making other changes to the formation.
@@ -159,7 +159,7 @@ module Sidekiq
           # (provides a trajectory, not necessarily a destination)
           target ||= scale_strategy.call(queue_system)
 
-          Sidekiq.logger.info "#update! - target fetched - current: #{ current } - target: #{ target }"
+          ::Sidekiq.logger.info "#update! - target fetched - current: #{ current } - target: #{ target }"
 
           # idle
           if current == target
@@ -254,7 +254,7 @@ module Sidekiq
 
       # syncs configuration across process instances (dynos)
       def sync_attributes
-        Sidekiq.logger.info "#sync_attributes"
+        ::Sidekiq.logger.info "#sync_attributes"
         if cache = ::Sidekiq.redis { |c| c.hgetall(cache_key) }
           Sidekiq.logger.info "#sync_attributes - cache: #{ cache }"
           @dynos = cache['dynos'] ? cache['dynos'].to_i : 0
