@@ -44,8 +44,10 @@ module Sidekiq
               log("After iteration size #{@requests.size}")
             end
           ensure
-            log("Cleaning thread")
-            @thread = nil
+            @semaphore.synchronize do
+              log("Cleaning thread")
+              @thread = nil
+            end
           end
         end
       end
