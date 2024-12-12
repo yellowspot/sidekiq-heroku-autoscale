@@ -2,6 +2,8 @@ module Sidekiq
   module HerokuAutoscale
 
     class PollInterval
+      attr_reader :thread
+
       def initialize(method_name, before_update: 0, after_update: 0)
         @method_name = method_name
         @before_update = before_update

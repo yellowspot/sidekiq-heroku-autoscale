@@ -9,15 +9,19 @@ module Sidekiq
       def call(worker_class, item, queue, _=nil)
         result = yield
 
-        ::Sidekiq.logger.info "Middleware (#{!!::Sidekiq.server?}): #{worker_class} #{queue}"
+        log("#{worker_class} #{queue}", !!_)
         if process = @app.process_for_queue(queue)
-          ::Sidekiq.logger.info "Middleware (#{!!::Sidekiq.server?}): ping #{process.name}"
+          log("ping to #{process.name}", !!_)
           process.ping!
         end
 
-        ::Sidekiq.logger.info "Middleware (#{!!::Sidekiq.server?}): process? #{!process.nil?}"
-
         result
+      end
+
+      def log(message, client_middleware = true)
+        type = !!::Sidekiq.server? ? 'server' : 'client'
+        middleware_type = client_middleware ? 'client' : 'server'
+        ::Sidekiq.logger.info("Middleware (#{type} - #{middleware_type}): #{message}")
       end
     end
 
