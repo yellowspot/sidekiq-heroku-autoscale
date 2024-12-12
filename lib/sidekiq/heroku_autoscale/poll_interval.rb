@@ -11,10 +11,14 @@ module Sidekiq
       end
 
       def call(process)
+        ::Sidekiq.logger.info("PollInterval (#{!!::Sidekiq.server?}): #{process&.name}")
         return unless process
+        ::Sidekiq.logger.info("PollInterval (#{!!::Sidekiq.server?}) - Storing process #{@requests.keys}")
         @semaphore.synchronize do
+          ::Sidekiq.logger.info("PollInterval (#{!!::Sidekiq.server?}) - Lock gain")
           @requests[process.name] ||= process
         end
+        ::Sidekiq.logger.info("PollInterval (#{!!::Sidekiq.server?}) - Now polling")
         poll!
       end
 
@@ -27,6 +31,8 @@ module Sidekiq
                 @requests.reject! { |n, p| p.send(@method_name) }
               end
               sleep(@after_update) if @after_update > 0
+
+              ::Sidekiq.logger.info("PollInterval (#{!!::Sidekiq.server?}) - After iteration size #{@requests.size}")
             end
           ensure
             @thread = nil
