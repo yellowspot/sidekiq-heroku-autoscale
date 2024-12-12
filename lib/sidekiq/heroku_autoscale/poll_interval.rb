@@ -10,6 +10,7 @@ module Sidekiq
         @after_update = after_update
         @requests = {}
         @semaphore = Mutex.new
+        @thread = nil
       end
 
       def call(process)
