@@ -23,6 +23,7 @@ module Sidekiq
       end
 
       def poll!
+        ::Sidekiq.logger.info("PollInterval (#{!!::Sidekiq.server?}) - Does thread exists? #{!!@thread}")
         @thread ||= Thread.new do
           begin
             ::Sidekiq.logger.info("PollInterval (#{!!::Sidekiq.server?}) - Thread started #{@requests.size}")
