@@ -1,3 +1,5 @@
+require 'concurrent'
+
 module Sidekiq
   module HerokuAutoscale
 
@@ -8,6 +10,12 @@ module Sidekiq
         @after_update = after_update
         @requests = {}
         @semaphore = Mutex.new
+        @pool = Concurrent::ThreadPoolExecutor.new(
+          min_threads: 0,
+          max_threads: 1,
+          max_queue: 1,
+          fallback_policy: :discard
+        )
       end
 
       def call(process)
@@ -19,21 +27,16 @@ module Sidekiq
       end
 
       def poll!
-        @thread ||= Thread.new do
-          begin
-            while @requests.size > 0
-              sleep(@before_update) if @before_update > 0
-              @semaphore.synchronize do
-                @requests.reject! { |n, p| p.send(@method_name) }
-              end
-              sleep(@after_update) if @after_update > 0
+        @pool.post do
+          while @requests.size > 0
+            sleep(@before_update) if @before_update > 0
+            @semaphore.synchronize do
+              @requests.reject! { |n, p| p.send(@method_name) }
             end
-          ensure
-            @thread = nil
+            sleep(@after_update) if @after_update > 0
           end
         end
       end
     end
-
   end
 end
