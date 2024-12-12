@@ -11,43 +11,48 @@ module Sidekiq
       end
 
       def call(process)
-        ::Sidekiq.logger.info("PollInterval (#{!!::Sidekiq.server?}): #{process&.name}")
+        log("Call Init: #{process&.name}")
         return unless process
-        ::Sidekiq.logger.info("PollInterval (#{!!::Sidekiq.server?}) - Storing process #{@requests.keys}")
+        log("Storing process #{@requests.keys}")
         @semaphore.synchronize do
-          ::Sidekiq.logger.info("PollInterval (#{!!::Sidekiq.server?}) - Lock gain")
+          log("Lock gain")
           @requests[process.name] ||= process
         end
-        ::Sidekiq.logger.info("PollInterval (#{!!::Sidekiq.server?}) - Now polling")
+        log("Now polling")
         poll!
       end
 
       def poll!
-        ::Sidekiq.logger.info("PollInterval (#{!!::Sidekiq.server?}) - Does thread exists? #{!!@thread}")
+        log("Does thread exists? #{!!@thread}")
         @thread ||= Thread.new do
           begin
-            ::Sidekiq.logger.info("PollInterval (#{!!::Sidekiq.server?}) - Thread started #{@requests.size}")
+            log("Thread started #{@requests.size}")
             while @requests.size > 0
-              ::Sidekiq.logger.info("PollInterval (#{!!::Sidekiq.server?}) - About to sleep for #{@before_update}")
+              log("About to sleep for #{@before_update}")
               sleep(@before_update) if @before_update > 0
-              ::Sidekiq.logger.info("PollInterval (#{!!::Sidekiq.server?}) - Wakeup before_update #{@before_update}")
+              log("Wakeup before_update #{@before_update}")
               @semaphore.synchronize do
-                ::Sidekiq.logger.info("PollInterval (#{!!::Sidekiq.server?}) - Rejecting all updated #{@requests.size} using #{@method_name}")
+                log("Rejecting all updated #{@requests.size} using #{@method_name}")
                 @requests.reject! { |n, p| p.send(@method_name) }
-                ::Sidekiq.logger.info("PollInterval (#{!!::Sidekiq.server?}) - After rejecting size #{@requests.size}")
+                log("After rejecting size #{@requests.size}")
               end
-              ::Sidekiq.logger.info("PollInterval (#{!!::Sidekiq.server?}) - About to sleep again #{@after_update}")
+              log("About to sleep again #{@after_update}")
               sleep(@after_update) if @after_update > 0
 
-              ::Sidekiq.logger.info("PollInterval (#{!!::Sidekiq.server?}) - After iteration size #{@requests.size}")
+              log("After iteration size #{@requests.size}")
             end
           ensure
-            ::Sidekiq.logger.info("PollInterval (#{!!::Sidekiq.server?}) - Cleaning thread")
+            log("Cleaning thread")
             @thread = nil
           end
         end
       end
-    end
 
+
+      def log(message)
+        type = !!::Sidekiq.server? ? 'server' : 'client'
+        ::Sidekiq.logger.info("PollInterval (#{type} - #{method_name}): #{message}")
+      end
+    end
   end
 end
