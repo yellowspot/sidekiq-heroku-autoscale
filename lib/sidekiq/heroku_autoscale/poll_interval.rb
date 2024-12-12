@@ -1,3 +1,5 @@
+require 'concurrent'
+
 module Sidekiq
   module HerokuAutoscale
 
