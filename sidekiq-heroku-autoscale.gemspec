@@ -18,4 +18,5 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'sidekiq', '>= 6.0.0', '< 8.0'
   s.add_dependency 'platform-api', '>= 3.7.0'
+  s.add_dependency 'concurrent-ruby', '>= 1.1.6'
 end
