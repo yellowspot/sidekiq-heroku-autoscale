@@ -68,3 +68,8 @@ def assert_raises_message(klass, pattern, &block)
   err = assert_raises(klass, &block)
   assert_match pattern, err.message
 end
+
+# Helper class to mock `Process` instances to test `PollInterval`
+TestPollIntervalProcess = Struct.new(:name, :rejectable, keyword_init: true) do
+  alias_method :reject?, :rejectable
+end
