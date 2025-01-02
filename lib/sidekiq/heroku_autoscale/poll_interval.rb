@@ -30,7 +30,7 @@ module Sidekiq
 
           # I expect from time to time a "RuntimeError: can't add a new key into hash during iteration".
           # If that happens, retry the insertion
-          ::Sidekiq.logger.info("Fail to insert process into requests hash. Retry ##{@retries}: #{e.message}")
+          ::Sidekiq.logger.warn("Fail to insert process into requests hash. Retry ##{@retries}: #{e.message}")
           @retries += 1
           retry
         end
