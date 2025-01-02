@@ -22,8 +22,16 @@ module Sidekiq
 
       def call(process)
         return unless process
+        @retries = 0
         @semaphore.synchronize do
           @requests[process.name] ||= process
+        rescue RuntimeError => e
+          raise e if @retries >= 50
+
+          # I expect from time to time a "RuntimeError: can't add a new key into hash during iteration".
+          # If that happens, retry the insertion
+          ::Sidekiq.logger.info("Fail to insert process into requests hash. Retry ##{@retries}: #{e.message}")
+          retry
         end
         poll!
       end

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'test_helper'
+
 describe 'Sidekiq::HerokuAutoscale::PollInterval' do
   describe 'call' do
     it 'does nothing when process is nil' do
