@@ -33,8 +33,8 @@ module Sidekiq
           while @requests.size > 0
             # Copy the requests, let the main thread continue to add new requests
             @semaphore.synchronize do
-              work = @request.dup
-              @request.except!(*work.keys)
+              work = @requests.dup
+              work.keys.each { |key| @requests.delete(key) }
             end
 
             while work.size > 0
