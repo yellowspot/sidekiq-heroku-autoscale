@@ -10,7 +10,7 @@ module Sidekiq
         @method_name = method_name
         @before_update = before_update
         @after_update = after_update
-        @requests = {}
+        @requests = Concurrent::Hash.new
         @semaphore = Mutex.new
         @pool = Concurrent::ThreadPoolExecutor.new(
           min_threads: 0,
@@ -22,17 +22,8 @@ module Sidekiq
 
       def call(process)
         return unless process
-        @retries = 0
         @semaphore.synchronize do
           @requests[process.name] ||= process
-        rescue RuntimeError => e
-          raise e if @retries >= 50
-
-          # I expect from time to time a "RuntimeError: can't add a new key into hash during iteration".
-          # If that happens, retry the insertion
-          ::Sidekiq.logger.warn("Fail to insert process into requests hash. Retry ##{@retries}: #{e.message}")
-          @retries += 1
-          retry
         end
         poll!
       end
@@ -40,11 +31,17 @@ module Sidekiq
       def poll!
         @pool.post do
           while @requests.size > 0
-            sleep(@before_update) if @before_update > 0
+            # Copy the requests, let the main thread continue to add new requests
             @semaphore.synchronize do
-              @requests.reject! { |n, p| p.send(@method_name) }
+              work = @request.dup
+              @request.except!(*work.keys)
             end
-            sleep(@after_update) if @after_update > 0
+
+            while work.size > 0
+              sleep(@before_update) if @before_update > 0
+              work.reject! { |n, p| p.send(@method_name) }
+              sleep(@after_update) if @after_update > 0
+            end
           end
         end
       end
