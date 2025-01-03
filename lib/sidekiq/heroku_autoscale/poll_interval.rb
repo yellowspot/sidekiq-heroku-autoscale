@@ -30,18 +30,21 @@ module Sidekiq
 
       def poll!
         @pool.post do
+          ::Sidekiq.logger.warn "Polling #{@method_name} processes. Request queued: #{@requests.size}"
           while @requests.size > 0
             # Copy the requests, let the main thread continue to add new requests
             @semaphore.synchronize do
               work = @requests.dup
               work.keys.each { |key| @requests.delete(key) }
             end
+            ::Sidekiq.logger.warn "Polling #{@method_name} processes. Work size: #{work.size}. Request queued after clearing: #{@requests.size}"
 
             while work.size > 0
               sleep(@before_update) if @before_update > 0
               work.reject! { |n, p| p.send(@method_name) }
               sleep(@after_update) if @after_update > 0
             end
+            ::Sidekiq.logger.warn "Polling #{@method_name} processes. Work done. Request queued after working: #{@requests.size}"
           end
         end
       end
