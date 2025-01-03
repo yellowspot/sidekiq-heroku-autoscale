@@ -32,8 +32,10 @@ module Sidekiq
         @pool.post do
           ::Sidekiq.logger.warn "Polling #{@method_name} processes. Request queued: #{@requests.size}"
           while @requests.size > 0
+            ::Sidekiq.logger.warn "Polling #{@method_name} processes. Waiting for the semaphore."
             # Copy the requests, let the main thread continue to add new requests
             @semaphore.synchronize do
+              ::Sidekiq.logger.warn "Polling #{@method_name} processes. Moving stuff to work queue."
               work = @requests.dup
               work.keys.each { |key| @requests.delete(key) }
             end
