@@ -29,7 +29,7 @@ GEM
       heroics (~> 0.1.1)
       moneta (~> 1.0.0)
       rate_throttle_client (~> 0.1.0)
-    rack (3.1.8)
+    rack (3.1.10)
     rake (12.3.3)
     rate_throttle_client (0.1.2)
     redis-client (0.22.2)
